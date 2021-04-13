@@ -5,7 +5,7 @@ L'objectif de ce tutorial est de découvrir les bases des notebooks Rmarkdown et
 ## Idées de visualisations 
 
 - [ ] Nombre d'établissements par type
-- [ ] Nombre détablissement par an
+- [ ] Nombre détablissements par an
 - [ ] Taille des établissements par type
 - [ ] Nombre détudiants par niveau
 - [ ] Nombre détudiants par discipline
