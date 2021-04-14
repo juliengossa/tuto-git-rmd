@@ -36,6 +36,13 @@ __Analyse__ : Le nombre de lignes dans les données décroit depuis l'année 201
 ### Nombre d'établissements par type 
 
 TODO : raphaele12
+```{r}
+base <- sise %>% select(Type.d.établissement, Etablissement) %>% unique() %>% group_by(Type.d.établissement) %>% summarise(nombre=n())
+
+
+base %>% ggplot(mapping= aes(y=Type.d.établissement, x= nombre)) + geom_col() + labs(title="Nombres d'ébalissements par type d'établissement")
+```
+
 
 ### Nombre détablissements par an
 
