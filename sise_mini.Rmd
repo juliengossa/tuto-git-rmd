@@ -49,6 +49,17 @@ TODO : Quentin-Rstudio
 
 TODO : Victorchareyron
 
+```{r}
+par_niv <- sise %>%
+  mutate(LM = paste0(CURSUS_LMD, NIVEAU)) %>%
+  group_by(LM) %>%
+  summarise(nb_etud = n()) %>%
+  select(LM, nb_etud)
+
+barplot(par_niv$nb_etud, names.arg = par_niv$LM)
+```
+
+
 ### Nombre détudiants par discipline
 
 TODO : nyurp
