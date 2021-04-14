@@ -12,7 +12,7 @@ library(tidyverse)
 ## Chargement des données
 
 ```{r chargement}
-sise <- read.csv("sise_mini.csv", header=TRUE)
+sise <- read.csv("sise_mini.csv", header=TRUE, encoding="UTF-8")
 ```
 
 Colonnes : 
@@ -29,3 +29,20 @@ sise %>%
 ```
 
 __Analyse__ : Le nombre de lignes dans les données décroit depuis l'année 2013, ce qui ne nous dit pas grand chose sur les effectifs étudiants en France.
+
+
+## Idées de visualisations 
+
+### Nombre d'établissements par type
+
+### Nombre détablissements par an
+
+### Taille des établissements par type
+
+### Nombre détudiants par niveau
+
+### Nombre détudiants par discipline
+
+### Nombre détudiants par type de diplôme
+
+### Nombre détudiants par mobilité
