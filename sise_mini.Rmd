@@ -44,7 +44,6 @@ TODO : cathberleur
 ### Taille des établissements par type
 
 ```{r quentin, echo= FALSE}
-
 grouped <- sise %>%
   group_by(Type.d.établissement) %>%
   summarize(Moyenne = mean(Effectifs)) 
