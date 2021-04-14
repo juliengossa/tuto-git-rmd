@@ -33,16 +33,32 @@ __Analyse__ : Le nombre de lignes dans les données décroit depuis l'année 201
 
 ## Idées de visualisations 
 
-### Nombre d'établissements par type
+### Nombre d'établissements par type 
+
+TODO : raphaele12
 
 ### Nombre détablissements par an
 
+TODO : cathberleur
+
 ### Taille des établissements par type
+
+TODO : Quentin-Rstudio
 
 ### Nombre détudiants par niveau
 
+TODO : Victorchareyron
+
 ### Nombre détudiants par discipline
+
+TODO : nyurp
 
 ### Nombre détudiants par type de diplôme
 
+TODO : ClaireGfd
+
 ### Nombre détudiants par mobilité
+
+TODO : agnesrmb 
+
+

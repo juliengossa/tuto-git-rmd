@@ -4,7 +4,7 @@ Tuto Git Rmd
 ## Chargement des données
 
 ``` r
-sise <- read.csv("sise_mini.csv", header=TRUE)
+sise <- read.csv("sise_mini.csv", header=TRUE, encoding="UTF-8")
 ```
 
 Colonnes :
@@ -33,3 +33,33 @@ sise %>%
 **Analyse** : Le nombre de lignes dans les données décroit depuis
 l’année 2013, ce qui ne nous dit pas grand chose sur les effectifs
 étudiants en France.
+
+## Idées de visualisations
+
+### Nombre d’établissements par type
+
+TODO : raphaele12
+
+### Nombre détablissements par an
+
+TODO : cathberleur
+
+### Taille des établissements par type
+
+TODO : Quentin-Rstudio
+
+### Nombre détudiants par niveau
+
+TODO : Victorchareyron
+
+### Nombre détudiants par discipline
+
+TODO : nyurp
+
+### Nombre détudiants par type de diplôme
+
+TODO : ClaireGfd
+
+### Nombre détudiants par mobilité
+
+TODO : agnesrmb
