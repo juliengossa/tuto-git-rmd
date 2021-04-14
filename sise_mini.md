@@ -46,11 +46,29 @@ TODO : cathberleur
 
 ### Taille des établissements par type
 
-TODO : Quentin-Rstudio
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+![](sise_mini_files/figure-gfm/quentin-1.png)<!-- -->
 
 ### Nombre détudiants par niveau
 
 TODO : Victorchareyron
+
+``` r
+par_niv <- sise %>%
+  mutate(LM = paste0(CURSUS_LMD, NIVEAU)) %>%
+  group_by(LM) %>%
+  summarise(nb_etud = n()) %>%
+  select(LM, nb_etud)
+```
+
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+barplot(par_niv$nb_etud, names.arg = par_niv$LM)
+```
+
+![](sise_mini_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ### Nombre détudiants par discipline
 
@@ -63,3 +81,14 @@ TODO : ClaireGfd
 ### Nombre détudiants par mobilité
 
 TODO : agnesrmb
+
+``` r
+sise %>%
+  group_by(Mobilité) %>%
+  summarise(Effectifs) %>%
+  ggplot(aes(x=Mobilité,y=Effectifs, group=1)) + geom_col()
+```
+
+    ## `summarise()` regrouping output by 'Mobilité' (override with `.groups` argument)
+
+![](sise_mini_files/figure-gfm/graphe.agnes-1.png)<!-- -->

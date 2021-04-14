@@ -54,11 +54,31 @@ sise %>%
 
 ### Taille des établissements par type
 
-TODO : Quentin-Rstudio
+```{r quentin, echo= FALSE}
+
+grouped <- sise %>%
+  group_by(Type.d.établissement) %>%
+  summarize(Moyenne = mean(Effectifs)) 
+
+  ggplot(data = grouped, mapping = aes(y = Type.d.établissement, x = Moyenne)) +
+  geom_col() + 
+    labs(title = "Effectif par année selon \nles types d'établissements")
+```
 
 ### Nombre détudiants par niveau
 
 TODO : Victorchareyron
+
+```{r}
+par_niv <- sise %>%
+  mutate(LM = paste0(CURSUS_LMD, NIVEAU)) %>%
+  group_by(LM) %>%
+  summarise(nb_etud = n()) %>%
+  select(LM, nb_etud)
+
+barplot(par_niv$nb_etud, names.arg = par_niv$LM)
+```
+
 
 ### Nombre détudiants par discipline
 
@@ -72,4 +92,11 @@ TODO : ClaireGfd
 
 TODO : agnesrmb 
 
+
+```{r graphe.agnes}
+sise %>%
+  group_by(Mobilité) %>%
+  summarise(Effectifs) %>%
+  ggplot(aes(x=Mobilité,y=Effectifs, group=1)) + geom_col()
+```
 
