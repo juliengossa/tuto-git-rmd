@@ -82,3 +82,10 @@ TODO : ClaireGfd
 TODO : agnesrmb 
 
 
+```{r graphe}
+sise %>%
+  group_by(Mobilité) %>%
+  summarise(Effectifs) %>%
+  ggplot(aes(x=Mobilité,y=Effectifs, group=1)) + geom_col()
+```
+
