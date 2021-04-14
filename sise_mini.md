@@ -26,8 +26,6 @@ sise %>%
   ggplot(aes(x=Rentrée,y=Ligne, group=1)) + geom_line()
 ```
 
-    ## `summarise()` ungrouping output (override with `.groups` argument)
-
 ![](sise_mini_files/figure-gfm/graphe-1.png)<!-- -->
 
 **Analyse** : Le nombre de lignes dans les données décroit depuis
@@ -45,8 +43,6 @@ TODO : raphaele12
 TODO : cathberleur
 
 ### Taille des établissements par type
-
-    ## `summarise()` ungrouping output (override with `.groups` argument)
 
 ![](sise_mini_files/figure-gfm/quentin-1.png)<!-- -->
 
