@@ -4,7 +4,7 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
 library(tidyverse)
 ```
@@ -35,7 +35,6 @@ __Analyse__ : Le nombre de lignes dans les données décroit depuis l'année 201
 
 ### Nombre d'établissements par type 
 
-TODO : raphaele12
 ```{r}
 base <- sise %>% select(Type.d.établissement, Etablissement) %>% unique() %>% group_by(Type.d.établissement) %>% summarise(nombre=n())
 
@@ -46,9 +45,8 @@ base %>% ggplot(mapping= aes(y=Type.d.établissement, x= nombre)) + geom_col() +
 
 ### Nombre détablissements par an
 
-TODO : cathberleur
 
-```{r graphe}
+```{r graphe.cathberleur}
 
 sise %>% 
   select(RENTREE, Etablissement) %>% 
@@ -74,8 +72,6 @@ grouped <- sise %>%
 
 ### Nombre détudiants par niveau
 
-TODO : Victorchareyron
-
 ```{r}
 par_niv <- sise %>%
   mutate(LM = paste0(CURSUS_LMD, NIVEAU)) %>%
@@ -87,18 +83,7 @@ barplot(par_niv$nb_etud, names.arg = par_niv$LM)
 ```
 
 
-### Nombre détudiants par discipline
-
-TODO : nyurp
-
-### Nombre détudiants par type de diplôme
-
-TODO : ClaireGfd
-
 ### Nombre détudiants par mobilité
-
-TODO : agnesrmb 
-
 
 ```{r graphe.agnes}
 sise %>%
