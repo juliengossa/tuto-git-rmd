@@ -41,6 +41,17 @@ TODO : raphaele12
 
 TODO : cathberleur
 
+```{r graphe}
+
+sise %>% 
+  select(RENTREE, Etablissement) %>% 
+  unique() %>% 
+  group_by(RENTREE) %>% 
+  summarise(nombre.etablissement=n()) %>%
+  ggplot(aes(x=RENTREE, y=nombre.etablissement)) + geom_col()
+
+```
+
 ### Taille des établissements par type
 
 TODO : Quentin-Rstudio
