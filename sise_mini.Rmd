@@ -53,12 +53,6 @@ TODO : Victorchareyron
 
 TODO : nyurp
 
-```{r graphe}
-disc <- sise %>%
-group_by(Discipline)
-
-ggplot(data = disc, mapping = aes (x= Discipline, y= Effectifs)
-```
 
 ### Nombre détudiants par type de diplôme
 
