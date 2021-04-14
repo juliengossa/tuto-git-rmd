@@ -26,6 +26,8 @@ sise %>%
   ggplot(aes(x=Rentrée,y=Ligne, group=1)) + geom_line()
 ```
 
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
 ![](sise_mini_files/figure-gfm/graphe-1.png)<!-- -->
 
 **Analyse** : Le nombre de lignes dans les données décroit depuis
@@ -44,7 +46,9 @@ TODO : cathberleur
 
 ### Taille des établissements par type
 
-TODO : Quentin-Rstudio
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+![](sise_mini_files/figure-gfm/quentin-1.png)<!-- -->
 
 ### Nombre détudiants par niveau
 
@@ -56,7 +60,11 @@ par_niv <- sise %>%
   group_by(LM) %>%
   summarise(nb_etud = n()) %>%
   select(LM, nb_etud)
+```
 
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
 barplot(par_niv$nb_etud, names.arg = par_niv$LM)
 ```
 
