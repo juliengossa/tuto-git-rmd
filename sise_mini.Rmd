@@ -82,7 +82,7 @@ TODO : ClaireGfd
 TODO : agnesrmb 
 
 
-```{r graphe}
+```{r graphe.agnes}
 sise %>%
   group_by(Mobilité) %>%
   summarise(Effectifs) %>%

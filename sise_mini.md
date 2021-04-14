@@ -26,6 +26,8 @@ sise %>%
   ggplot(aes(x=Rentrée,y=Ligne, group=1)) + geom_line()
 ```
 
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
 ![](sise_mini_files/figure-gfm/graphe-1.png)<!-- -->
 
 **Analyse** : Le nombre de lignes dans les données décroit depuis
@@ -43,6 +45,8 @@ TODO : raphaele12
 TODO : cathberleur
 
 ### Taille des établissements par type
+
+    ## `summarise()` ungrouping output (override with `.groups` argument)
 
 ![](sise_mini_files/figure-gfm/quentin-1.png)<!-- -->
 
@@ -77,3 +81,14 @@ TODO : ClaireGfd
 ### Nombre détudiants par mobilité
 
 TODO : agnesrmb
+
+``` r
+sise %>%
+  group_by(Mobilité) %>%
+  summarise(Effectifs) %>%
+  ggplot(aes(x=Mobilité,y=Effectifs, group=1)) + geom_col()
+```
+
+    ## `summarise()` regrouping output by 'Mobilité' (override with `.groups` argument)
+
+![](sise_mini_files/figure-gfm/graphe.agnes-1.png)<!-- -->
