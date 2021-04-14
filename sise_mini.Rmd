@@ -43,7 +43,7 @@ TODO : cathberleur
 
 ### Taille des établissements par type
 
-```{r quentin echo= FALSE}
+```{r quentin, echo= FALSE}
 
 grouped <- sise %>%
   group_by(Type.d.établissement) %>%
@@ -56,6 +56,7 @@ grouped <- sise %>%
 
 
 ```
+
 ### Nombre détudiants par niveau
 
 TODO : Victorchareyron

@@ -44,7 +44,7 @@ TODO : cathberleur
 
 ### Taille des établissements par type
 
-TODO : Quentin-Rstudio
+![](sise_mini_files/figure-gfm/quentin-1.png)<!-- -->
 
 ### Nombre détudiants par niveau
 
