@@ -50,18 +50,6 @@ TODO : cathberleur
 
 TODO : Victorchareyron
 
-``` r
-par_niv <- sise %>%
-  mutate(LM = paste0(CURSUS_LMD, NIVEAU)) %>%
-  group_by(LM) %>%
-  summarise(nb_etud = n()) %>%
-  select(LM, nb_etud)
-
-barplot(par_niv$nb_etud, names.arg = par_niv$LM)
-```
-
-![](sise_mini_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
-
 ### Nombre détudiants par discipline
 
 TODO : nyurp
