@@ -1,0 +1,31 @@
+---
+title: "Tuto Git Rmd"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+## Chargement des données
+
+```{r chargement}
+sise <- read.csv("sise_mini.csv", header=TRUE)
+```
+
+Colonnes : 
+
+```{r colonnes}
+colnames(sise)
+```
+
+```{r graphe}
+sise %>%
+  group_by(Rentrée) %>%
+  summarise(Ligne = n()) %>%
+  ggplot(aes(x=Rentrée,y=Ligne, group=1)) + geom_line()
+```
+
+__Analyse__ : Le nombre de lignes dans les données décroit depuis l'année 2013, ce qui ne nous dit pas grand chose sur les effectifs étudiants en France.
