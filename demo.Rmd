@@ -1,0 +1,38 @@
+---
+title: "Tuto Git Rmd"
+output: 
+ github_document: default
+ beamer_presentation: 
+   slide_level: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+
+library(tidyverse)
+```
+
+## Chargement des données et fonction
+
+```{r chargement}
+sise <- read.csv("sise_mini.csv", header=TRUE, encoding="UTF-8")
+
+myplot <- function(etab) {
+  sise %>%
+    filter(Etablissement == etab) %>%
+    group_by(Rentrée, CURSUS_LMD) %>%
+    summarise(Effectifs = sum(Effectifs)) %>%
+    mutate(CURSUS_LMD = factor(CURSUS_LMD,levels=c("D","M","L"))) %>%
+    ggplot(aes(x=Rentrée,y=Effectifs,fill=CURSUS_LMD)) +
+    geom_area()
+}
+```
+
+## Etablissements
+
+```{r demo, results='asis', fig.width=6, fig.height=3}
+for(etab in c("Université de Strasbourg","École normale supérieure Cachan/Paris-Saclay","Université Paris-Saclay")) {
+  cat("\n\n###",etab,"\n")
+  print(myplot(etab))
+}
+```
