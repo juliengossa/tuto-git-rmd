@@ -20,7 +20,7 @@ library(FactoMineR)
 sise <- read.csv("C:/Users/quent/Desktop/ENS Paris-Saclay/1A/1S2/Atelier CPESR/sise19.csv", header=TRUE, encoding="UTF-8", sep = ";")
 
 ACP <- function(academie) {
-  sise %>%
+  db <- sise %>%
     mutate(diplome_univ=str_sub(sise$TYP_DIPL,1,1))%>%
     filter(ACAETA == academie) %>%
     filter(ETABLI != "") %>%
@@ -51,12 +51,14 @@ ACP <- function(academie) {
               ouvrier = mean(PCSPAR %in% c(61,66,69)),
               agriculteur = mean(PCSPAR == 10),
               prof_inter = mean(PCSPAR %in% 42:48),
-              du=mean(DU)) %>%
-    mutate(poids=effectif/sum(effectif)) %>% 
-    select(-effectif,-ETABLI,-academie) %>% 
-    relocate(c("hommes","femmes","doctorats","masters","licences"),.after= prof_inter)
+              du=mean(DU)) 
   
-resultat_ACP<-PCA(sise[,1:17], quanti.sup=13:17,row.w=pour_PCA$poids)
+pour_PCA<-db %>% 
+  mutate(poids=effectif/sum(effectif)) %>% 
+  select(-effectif,-ETABLI,-academie) %>% 
+  relocate(c("hommes","femmes","doctorats","masters","licences"),.after= prof_inter)
+
+resultat_ACP<-PCA(pour_PCA[,4:22], quanti.sup= 13:17, row.w=pour_PCA$poids)
   
 dbact<-as_tibble(resultat_ACP$var$coord) %>% 
   mutate(type="Var actives") %>% 
@@ -68,10 +70,10 @@ dbsup<-as_tibble(resultat_ACP$quanti.sup$coord) %>%
 
 dbvar<-bind_rows(dbact,dbsup)
 
-dbind<-bind_cols(sise,as_tibble(resultat_ACP$ind$coord))
+dbind<-bind_cols(db,as_tibble(resultat_ACP$ind$coord))
 
 ggplot(dbvar,aes(x=Dim.1,y=-Dim.2,
-                 label=names,color=type))+
+                 label=names))+
   scale_shape_manual(values=c("triangle","square"))+
   geom_point(aes(shape=type))+
   theme(legend.title=element_blank(),
@@ -87,10 +89,9 @@ ggplot(dbvar,aes(x=Dim.1,y=-Dim.2,
   ylab(paste("Axe 2 :",round(resultat_ACP$eig[2,2],0),"%"))
 
 ggplot(data=dbind,aes(x=Dim.1,y=-Dim.2))+
-  ggtitle("Universités 2019 (couleur suivant Proportion femmes)")+
-  scale_color_gradient(low = "green", high = "red")+
-  geom_point(aes(color=femmes))+
-  geom_text_repel(aes(color=femmes,label=Sigle),size=3)+
+  ggtitle("Universités 2019")+
+  geom_point()+
+  geom_text_repel(aes(label=academie),size=3)+
   geom_hline(yintercept=0,linetype="dashed")+
   geom_vline(xintercept = 0,linetype="dashed")+
   theme(plot.title=element_text(hjust=0.5),legend.position=c(.95,.2),
@@ -104,7 +105,7 @@ ggplot(data=dbind,aes(x=Dim.1,y=-Dim.2))+
 ## Etablissements
 
 ```{r demo, results='asis', fig.width=6, fig.height=3}
-for(academie in c("1","2","3","4","5","6","7", "8","9","10","11","12","13","14","15","16","17","18","19","20", "21","22","23","24","25","27","28","32","33","40","41","43")) {
+for(academie in c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 32, 33, 40, 41)) {
   cat("\n\n###",academie,"\n")
   print(ACP(academie))
 }
