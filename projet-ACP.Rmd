@@ -1,9 +1,9 @@
 ---
 title: "Projet ACP automatisées"
 output: 
- github_document : 
-  toc : true
  pdf_document : 
+  toc : true
+ github_document : 
   toc : true
 editor_options: 
   chunk_output_type: console
