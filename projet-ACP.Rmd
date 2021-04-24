@@ -5,6 +5,8 @@ output:
   toc : true
  pdf_document : 
   toc : true
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -16,7 +18,7 @@ library(FactoMineR)
 library(kpiESR)
 library(ggpubr)
 library(ggforce)
-
+library(RColorBrewer)
 ```
 
 
@@ -59,22 +61,18 @@ sise <- sise %>%
                             ACAETA == 40 ~ "Académie de Nouvelle Calédonie", 
                             ACAETA == 41 ~ "Académie de Polynésie française"))
 
- 
-
-ACP <- function(academie) {
-  db <- sise %>%
+ db <- sise %>%
     mutate(diplome_univ=str_sub(sise$TYP_DIPL,1,1))%>%
-    filter(ACANOM == academie) %>%
     filter(ETABLI != "") %>%
     mutate(niveau=paste0(CURSUS_LMD,NIVEAU)) %>%
     select(idet, ETABLI, ACAETA, ACANOM, SEXE, BAC_RGRP, CURSUS_LMD,niveau, DISCIPLI, PCSPAR,diplome_univ) %>%
-    mutate(discipline=case_when(DISCIPLI=="1"~"DROIT",
+    mutate(discipline=case_when(DISCIPLI=="1"~"Droit",
                                 DISCIPLI %in% c("2","4","5","6","32","20")~"SHS",
-                                DISCIPLI=="3"~"AES",DISCIPLI %in% c("15","9","33")~"SCIENCES",
-                                DISCIPLI=="10"~"STAPS",DISCIPLI %in% c("11","12","13","34","40")~"SANTE",))%>%
+                                DISCIPLI=="3"~"AES",DISCIPLI %in% c("15","9","33")~"Sciences",
+                                DISCIPLI=="10"~"Staps",DISCIPLI %in% c("11","12","13","34","40")~"Santé",))%>%
     mutate(DU=case_when(diplome_univ=="U"~1,T~0))%>% 
-    group_by(ETABLI,discipline) %>%
-    summarize(academie = first(ACANOM),
+    group_by(ETABLI,discipline, niveau) %>%
+    summarize(ACANOM = first(ACANOM),
               effectif = n_distinct(idet),
               hommes = mean(SEXE == 1),
               femmes = mean(SEXE == 2),
@@ -97,13 +95,18 @@ ACP <- function(academie) {
   db <- db %>%
     left_join(esr[esr$Rentrée == 2018,c("UAI","Libellé","Sigle")],
               by=c("ETABLI"="UAI"))
-  
+
+ACP <- function(academie) {
+  # academie <- "Académie de Paris"
+ db <- db %>%
+  filter(ACANOM == academie)
+
 pour_PCA<-db %>% 
   mutate(poids=effectif/sum(effectif)) %>% 
-  select(-effectif,-ETABLI,-academie, -discipline) %>% 
+  select(-effectif,-ETABLI,-ACANOM, -discipline, -niveau) %>% 
   relocate(c("hommes","femmes","doctorats","masters","licences", "Libellé", "Sigle"),.after= prof_inter)
 
-resultat_ACP<-PCA(pour_PCA[,2:18], quanti.sup= 13:17, row.w=pour_PCA$poids, graph = FALSE)
+resultat_ACP<-PCA(pour_PCA[,3:19], quanti.sup= 13:17, row.w=pour_PCA$poids, graph = FALSE)
   
 dbact<-as_tibble(resultat_ACP$var$coord) %>% 
   mutate(type="Variables actives") %>% 
@@ -117,7 +120,8 @@ dbvar<-bind_rows(dbact,dbsup)
 
 dbind<-bind_cols(db,as_tibble(resultat_ACP$ind$coord))
 
-var_plot <- ggplot(dbvar,aes(x= Dim.1,y= Dim.2,label=names))+
+var_plot <- ggplot(dbvar,aes(x= Dim.1,y= Dim.2,label=names, color = type))+
+  scale_color_manual(values = c("blue4", "brown3")) +
   theme(legend.title=element_blank(),
         panel.background =element_rect(fill="white")) +
   geom_text_repel(size=4,show.legend = FALSE)+
@@ -132,17 +136,19 @@ var_plot <- ggplot(dbvar,aes(x= Dim.1,y= Dim.2,label=names))+
   coord_fixed() +
   geom_segment(aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2, linetype = type), arrow = arrow())
 
-ind_plot <- ggplot(data=dbind,aes(x=Dim.1,y=Dim.2))+
+ind_plot <- ggplot(data=dbind,aes(x=Dim.1,y=Dim.2, color = Sigle))+
   ggtitle(paste0("Figure II - Espace des formations universitaires de l'", academie))+
+  scale_color_brewer(palette = "Set1") +
   geom_point()+
-  geom_text_repel(aes(label=paste(Sigle, discipline),size=3))+
+  geom_text_repel(aes(label=paste(Sigle, discipline, niveau)),size=3, show.legend = FALSE)+
   geom_hline(yintercept=0,linetype="dashed")+
   geom_vline(xintercept = 0,linetype="dashed")+
   theme(plot.title=element_text(hjust=0.5),legend.position=c(.95,.2),
         panel.background =element_rect(fill="white"),legend.title=element_blank())+
-  labs(caption = "L'analyse en composantes principales est menée sur une aggrégation par établissement et discipline.")+
+  labs(caption = "L'analyse en composantes principales est menée sur une aggrégation par établissement, discipline et niveau.")+
   xlab(paste("Axe 1 :",round(resultat_ACP$eig[1,2],0),"%"))+
   ylab(paste("Axe 2 :",round(resultat_ACP$eig[2,2],0),"%"))
+  guides(label = FALSE)
 
 ggarrange(var_plot, ind_plot, ncol = 1)
    
@@ -165,6 +171,7 @@ for(academie in c("Académie de Paris", "Académie d'Aix-Marseille", "Académie 
                   "Académie de Versailles", "Académie de Corse", "Académie de la Réunion", "Académie de Guadeloupe",
                   "Académie de Guyane", "Académie de Nouvelle Calédonie", "Académie de Polynésie française")) {
   cat("\n\n##",academie,"\n")
+  # cat("Ci-dessous sont présentés les résultats pour l'", academie,". L'Analyse en composantes principales a été menée sur les données par établissement, discipline et niveau, ce qui constitue pour cette académie",nrow(db[db$ACANOM == academie]), "observations. La variance totale expliquée par les deux axes les plus significatifs est de",round(resultat_ACP$eig[1,2]+resultat_ACP$eig[2,2]), "%.")
   print(ACP(academie))
 }
 ```
