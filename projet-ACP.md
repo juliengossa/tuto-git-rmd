@@ -39,6 +39,9 @@ Projet ACP automatisées
 
 # Présentation
 
+A vérifier : la variable “niveau” affichée notamment dans le graphique
+des individus affiche des valeurs anormales : M6, L5,etc.
+
 # Etablissements
 
 ## Académie de Paris
