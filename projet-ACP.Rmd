@@ -1,9 +1,9 @@
 ---
 title: "Projet ACP automatisées"
 output: 
- github_document : 
-  toc : true
  pdf_document : 
+  toc : true
+ github_document : 
   toc : true
 editor_options: 
   chunk_output_type: console
@@ -175,3 +175,36 @@ for(academie in c("Académie de Paris", "Académie d'Aix-Marseille", "Académie 
   print(ACP(academie))
 }
 ```
+
+# Ebauche de commentaire
+
+
+### Comparaison des graphiques des variables
+
+Globalement, le cercle des variables pour les deux ACP présente une structure commune révélatrice de variables déterminantes dans la structuration du champ de l'ES, à savoir : 
+
+- le sexe (hommes et femmes sont fortement négativement corrélés)
+- l'opposition entre baccalauréat scientifique et les autres baccalauréats (d'une part généreaux ES et L et d'autre part technlogiques et professionnels)
+- l'origine sociale saisie par la CSP du référent légal.
+
+Les axes de l'espace des formations peuvent globalement être inteprétés de la façon suivante : 
+
+- l'axe 1 (haut/bas) : type de filière, scientifique vs littéraire, gestion et droit
+- l'axe 2 (gauche/droite) : degré de sélection/d'ouverture sociale
+
+Toutefois, les différentes variables n'ont pas la même contribution laissant penser que l'interprétation des axes structurant les espaces locaux est variable selon les contextes locaux. Nous identifions ainsi quelques particularités. 
+
+## Comparaison des espaces des formations entre les académies
+
+
+### Des espaces de formations plus ou moins polarisés ou homogènes
+
+On peut noter que dans certaines académies les établissements sont beaucoup plus proches les uns des autres consitutant un nuage de point assez dense pour l'académie de Lyon par exemple ce qui n'est pas seulement lié au nombre important de formations représentées si l'on compare à Toulouse.
+Il faudrait regarder plus en détail les données puisque les espaces ne reflètent pas complètement l'offre totale de formation mais cela laisse néanmoins supposer qu'il y a bien des différences régionales dans la polarisation de l'ES.
+
+### Une polarisation entre les licences et les masters plus ou moins marquée selon les académies.
+
+On peut par exemple noter que pour l'académie de Dijon par rapport à celle de Grenoble l'opposition spatiale entre les masters et les licences le long de l'axe 2 est plus marquée et se surajoute à l'opposition selon le type de filière ce qui est moins le cas à Grenoble (une licence scientifique se trouvant tout à gauche notamment).
+
+ 
+
