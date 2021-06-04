@@ -1,5 +1,14 @@
 ---
 title: "Projet ACP automatisées"
+header-includes : 
+- \usepackage{hyperref}
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead{}
+- \fancyfoot{}
+- \fancyfoot[C]{\hyperlink{page.1}{TOC}}
+- \fancyfoot[R]{\thepage}
+
 output: 
  pdf_document : 
   toc : true
@@ -19,6 +28,7 @@ library(kpiESR)
 library(ggpubr)
 library(ggforce)
 library(RColorBrewer)
+library(knitr)
 ```
 
 
@@ -95,46 +105,44 @@ sise <- sise %>%
   db <- db %>%
     left_join(esr[esr$Rentrée == 2018,c("UAI","Libellé","Sigle")],
               by=c("ETABLI"="UAI"))
-
-ACP <- function(academie) {
-  # academie <- "Académie de Paris"
- db <- db %>%
-  filter(ACANOM == academie)
-
-pour_PCA<-db %>% 
+  
+  pour_PCA<-db %>% 
   mutate(poids=effectif/sum(effectif)) %>% 
   select(-effectif,-ETABLI,-ACANOM, -discipline, -niveau) %>% 
   relocate(c("hommes","femmes","doctorats","masters","licences", "Libellé", "Sigle"),.after= prof_inter)
 
-resultat_ACP<-PCA(pour_PCA[,3:19], quanti.sup= 13:17, row.w=pour_PCA$poids, graph = FALSE)
+  resultat_ACP<-PCA(pour_PCA[,3:19], quanti.sup= 13:17, row.w=pour_PCA$poids, graph = FALSE)
   
-dbact<-as_tibble(resultat_ACP$var$coord) %>% 
+  dbact<-as_tibble(resultat_ACP$var$coord) %>% 
   mutate(type="Variables actives") %>% 
   mutate(names=c(rownames(resultat_ACP$var$coord)))
-
-dbsup<-as_tibble(resultat_ACP$quanti.sup$coord) %>% 
+  
+  dbsup<-as_tibble(resultat_ACP$quanti.sup$coord) %>% 
   mutate(type="Variables supplémentaires") %>% 
   mutate(names=c(rownames(resultat_ACP$quanti.sup$coord)))
 
 dbvar<-bind_rows(dbact,dbsup)
 
-dbind<-bind_cols(db,as_tibble(resultat_ACP$ind$coord))
-
 var_plot <- ggplot(dbvar,aes(x= Dim.1,y= Dim.2,label=names, color = type))+
   scale_color_manual(values = c("blue4", "brown3")) +
-  theme(legend.title=element_blank(),
+  theme(legend.title=element_blank(), legend.text = element_text(size = 8), legend.position = "bottom",
         panel.background =element_rect(fill="white")) +
-  geom_text_repel(size=4,show.legend = FALSE)+
-  geom_hline(yintercept=0,linetype="dashed",colour="grey")+
-  geom_vline(xintercept = 0,linetype="dashed",colour="grey")+
-  ggtitle(paste0("Figure I - Espace des variables de l'ACP pour l'", academie)) +
+  geom_text_repel(size=3,show.legend = FALSE, max.overlaps = 5)+
+  geom_hline(yintercept=0,linetype="dashed",colour="grey", size = 0.25)+
+  geom_vline(xintercept = 0,linetype="dashed",colour="grey", size = 0.25)+
+  ggtitle("Figure I - Espace des variables de l'ACP \npour les formations universitaires françaises", ) +
   xlab(paste("Axe 1 :",round(resultat_ACP$eig[1,2],0),"%"))+
   ylab(paste("Axe 2 :",round(resultat_ACP$eig[2,2],0),"%")) +
-  geom_circle( aes(x0 = 0, y0 = 0, r = 1), inherit.aes = F) + 
+  geom_circle( aes(x0 = 0, y0 = 0, r = 1), inherit.aes = F, size = 0.25) + 
   scale_x_continuous(limits = c(-1, 1)) +
   scale_y_continuous(limits = c(-1, 1)) +
   coord_fixed() +
-  geom_segment(aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2, linetype = type), arrow = arrow())
+  geom_segment(aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2, linetype = type), arrow = arrow(), size = 0.5)
+
+graphique <- function(academie) {
+
+dbind<-bind_cols(db,as_tibble(resultat_ACP$ind$coord)) %>%
+    filter(ACANOM == academie)
 
 ind_plot <- ggplot(data=dbind,aes(x=Dim.1,y=Dim.2, color = Sigle))+
   ggtitle(paste0("Figure II - Espace des formations universitaires de l'", academie))+
@@ -145,23 +153,44 @@ ind_plot <- ggplot(data=dbind,aes(x=Dim.1,y=Dim.2, color = Sigle))+
   geom_vline(xintercept = 0,linetype="dashed")+
   theme(plot.title=element_text(hjust=0.5),legend.position=c(.95,.2),
         panel.background =element_rect(fill="white"),legend.title=element_blank())+
-  labs(caption = "L'analyse en composantes principales est menée sur une aggrégation par établissement, discipline et niveau.")+
+  labs(caption = "L'analyse en composantes principales est menée sur une aggrégation à l'échelle nationale par établissement, discipline et niveau.") +
   xlab(paste("Axe 1 :",round(resultat_ACP$eig[1,2],0),"%"))+
   ylab(paste("Axe 2 :",round(resultat_ACP$eig[2,2],0),"%"))
   guides(label = FALSE)
 
-ggarrange(var_plot, ind_plot, ncol = 1)
-   
+ind_plot
+
 }
 ```
 
-# Présentation 
+***
 
-A vérifier : la variable "niveau" affichée notamment dans le graphique des individus affiche des valeurs anormales : M6, L5,etc. 
+\newpage
 
-# Etablissements
+# 1. Présentation des résultats de l'ACP à l'échelle nationale. 
 
-```{r demo, results='asis', fig.width=10, fig.height=20, fig.align= "center"}
+```{r, fig.width= 7, fig.height= 5}
+barplot(resultat_ACP$eig[,2],main="Figure I - Part expliquée par chaque axe dans la variance totale",
+        names.arg=1:nrow(resultat_ACP$eig),col= rainbow (15))
+
+kable(resultat_ACP$eig, caption = "Tableau des valeurs propres et \nvariances des composantes principales")
+
+
+```
+ 
+```{r, fig.width= 6, fig.height= 6 }
+
+var_plot
+```
+
+A vérifier : la variable "niveau" représentée notamment dans le graphique des individus affiche des valeurs anormales : M6, L5,etc. 
+De plus, certains établissements n'ont pas de libellé, ce qui rend difficilement lisibles leur représentation graphique. 
+
+\newpage
+
+# 2. Etablissements
+
+```{r demo, results='asis', fig.width=12, fig.height=8, fig.align= "center"}
 for(academie in c("Académie de Paris", "Académie d'Aix-Marseille", "Académie de Besançon", "Académie de Bordeaux",
                   "Académie de Caen", "Académie de Clermont-Ferrand", "Académie de Dijon", "Académie de Grenoble",
                   "Académie de Lille", "Académie de Lyon", "Académie de Montpellier", "Académie de Nancy-Metz",
@@ -171,12 +200,12 @@ for(academie in c("Académie de Paris", "Académie d'Aix-Marseille", "Académie 
                   "Académie de Versailles", "Académie de Corse", "Académie de la Réunion", "Académie de Guadeloupe",
                   "Académie de Guyane", "Académie de Nouvelle Calédonie", "Académie de Polynésie française")) {
   cat("\n\n##",academie,"\n")
-  # cat("Ci-dessous sont présentés les résultats pour l'", academie,". L'Analyse en composantes principales a été menée sur les données par établissement, discipline et niveau, ce qui constitue pour cette académie",nrow(db[db$ACANOM == academie]), "observations. La variance totale expliquée par les deux axes les plus significatifs est de",round(resultat_ACP$eig[1,2]+resultat_ACP$eig[2,2]), "%.")
-  print(ACP(academie))
+  
+  print(graphique(academie))
 }
 ```
 
-# Ebauche de commentaire
+# 3. Ebauche de commentaire
 
 
 ### Comparaison des graphiques des variables
