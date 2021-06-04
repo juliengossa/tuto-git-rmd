@@ -1,0 +1,177 @@
+---
+title: "Évolution de la polarisation universitaire dans une partie des DOM-TOM"
+author: "Agnès Raimbault, Claire Gioffredo, Raphaële Marger"
+date: "04/06/2021"
+output : github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F)
+
+library(tidyverse)
+library(FactoMineR)
+library(kpiESR)
+library(ggrepel)
+library(ggforce)
+library(ggpubr)
+setwd("~/Documents/GitHub/devoir-h2k")
+
+```
+
+## Présentation
+Cette étude utilise la méthode de l'analyse en composantes principales (ACP) pour étudier l'évolution de la polarisation universitaire en Réunion, Guadeloupe, Nouvelle-Calédonie et Polynésie Française. Ces départements ont été retenus en raison du contenu des données exploitées. La base utilisée (SISE) offre des données sur 12 ans, de 2006 à 2018, tous les trois ans.
+
+## Éléments d'interprétation 
+Une première chose à dire sur les cinq analyses en composantes principales est que les deux premiers axes ont toujours une valeur explicative située entre 30% et 40% environ. Cela signifie donc que leur portée n'est pas très grande.  
+Ensuite, certaines tendances restent au cours des années comme l'orientation du doctorat ou du bac L par exemple tandis que d'autres bougent fortement tels que la branche agriculteur ou professeur intermédiaire.  
+Par ailleurs, même si leur inclinaison change, les catégories homme et femme restent opposées, cela est dû au fait que la variable sexe prenne comme valeur 1 et 2 ce qui fait que l'ACP ne peut réduire autrement qu'en les opposant franchement.  
+
+Aux vues de l'orientation des différentes variables, l'axe principal (Axe 1) correspondrait au niveau d'étude ainsi qu'au prestige de la formation. En effet, on observe une opposition nette entre le doctorat, en bas à gauche et la licence en haut à droite, et cela quelque soit l'année étudiée. De même, les professions supérieures sont éloignées des bacs professionnels par exemple.   
+On peut noter que la variable chef d'entreprise passe d'un côté à l'autre de l'axe suivant les années sans forcément suivre une logique particulière et cela est probablement dû au fait qu'être chef d'entreprise ne signifie pas avoir fait beaucoup d'étude, cela dépend d'un certain nombre d'autres variables.  
+Le second axe (Axe 2) est en lien avec les disciplines étudiées ainsi que les matières. Ainsi, le bac S est opposé au L et ES.  
+On voit sur l'évolution des années que certaines variables se déplacent. les professions intermédiaires passent du côté haut gauche à la droite au fil des années. De même, les agriculteurs se rapprochent du centre alors qu'ils étaient en haut à droite dans les années 2006-2009.  
+De la même façon, les bacs professionnels et technologiques descendent dans le cercle des corrélations. Cela peut dénoter par exemple une ouverture de filières dans le sens où il n'y aurait plus que des bac professionnels scientifiques mais aussi des bacs professionnels tournés vers la gestion, la vente ou encore le tourisme.  
+
+
+
+```{r boucle pour ACP}
+
+for (k in c("06","09","12","15","18")) {
+  base_annee  <- read.csv(paste0("sise_univ_inscriptions_",k,".csv"), sep=";")
+  
+  db_complete_annee <- base_annee
+  
+  db_complete_annee <-  db_complete_annee %>%
+      mutate( diplome_univ= str_sub( base_annee$TYP_DIPL,1,1 )) %>%
+      filter( ACAETA %in% c("28","32","40","41") ) %>%
+      mutate(ACANOM = case_when(ACAETA == 28 ~ "Réunion",
+                            ACAETA == 32 ~ "Guadeloupe",
+                            ACAETA == 40 ~ "Nouvelle Calédonie",
+                            ACAETA == 41 ~ "Polynésie Française")) %>%
+      filter(ETABLI != "") %>%
+      mutate(niveau = paste0( CURSUS_LMD,NIVEAU )) %>%
+      select(idet, ETABLI, ACANOM, SEXE, BAC_RGRP, CURSUS_LMD,niveau, DISCIPLI, PCSPAR,diplome_univ) %>%
+      mutate(discipline=case_when(DISCIPLI=="1"~"Droit",
+                              DISCIPLI %in% c("2","4","5","6","32","20")~"SHS",
+                              DISCIPLI=="3"~"AES",
+                              DISCIPLI %in% c("15","9","33")~"SCIENCES",
+                              DISCIPLI=="10"~"STAPS",
+                              DISCIPLI %in% c("11","12","13","34","40")~"SANTE",)) %>%
+      mutate(DU=case_when(diplome_univ=="U"~1,
+                      T~0))%>% 
+      group_by(ETABLI,niveau,discipline) %>%
+      summarize(ACANOM = first(ACANOM),
+            effectif = n_distinct(idet), 
+            hommes = mean(SEXE == 1),
+            femmes = mean(SEXE == 2),
+            bac_S = mean(BAC_RGRP == 3),
+            bac_L = mean(BAC_RGRP == 1),
+            bac_ES = mean(BAC_RGRP == 2),
+            bac_pro = mean(BAC_RGRP == 6),
+            bac_techno = mean(BAC_RGRP %in% c(4,5)),
+            doctorats = mean(CURSUS_LMD == "D"),
+            masters = mean(CURSUS_LMD == "M"),
+            licences = mean(CURSUS_LMD == "L"),
+            chef_ent = mean(PCSPAR == 23),
+            prof_sup = mean(PCSPAR %in% c(31,33,34,35,37,38)),
+            art_comm = mean(PCSPAR %in% c(21,22)),
+            employe = mean(PCSPAR %in% 52:56),
+            ouvrier = mean(PCSPAR %in% c(61,66,69)),
+            agriculteur = mean(PCSPAR == 10),
+            prof_inter = mean(PCSPAR %in% 42:48),
+            du=mean(DU))
+
+  assign(paste0("db_complete_annee",k, sep = "_"), db_complete_annee) 
+  
+
+  ## ACP ---- 
+  base_annee_ACP <- PCA(db_complete_annee, quali.sup=1:4, graph = F)
+  
+  # # Tests de la pertinence de l'ACP :
+  # bar_plot <-  barplot(base_annee_ACP$eig[,2],
+  #                      main=paste0("Figure I - Part expliquée par chaque axe dans la variance totale pour l'année 20", k),
+  #                      names.arg=1:nrow(base_annee_ACP$eig),col= rainbow (15))
+
+  # Graphiques de l'ACP :
+  
+  dbact<-as_tibble(base_annee_ACP$var$coord) %>% 
+    mutate(names=c(rownames(base_annee_ACP$var$coord)))
+  
+  dbind<-bind_cols(db_complete_annee,as_tibble(base_annee_ACP$ind$coord))
+  
+  var_plot <- ggplot(dbact,aes(x= Dim.1,y= Dim.2,label=names))+
+    theme(legend.title=element_blank(),
+          panel.background =element_rect(fill="white")) +
+    geom_text_repel(size=4,show.legend = FALSE)+
+    geom_hline(yintercept=0,linetype="dashed",colour="grey")+
+    geom_vline(xintercept = 0,linetype="dashed",colour="grey")+
+    ggtitle(paste0("Figure I - Espace des variables de l'ACP pour l'année 20", k)) +
+    xlab(paste("Axe 1 :",round(base_annee_ACP$eig[1,2],0),"%"))+
+    ylab(paste("Axe 2 :",round(base_annee_ACP$eig[2,2],0),"%")) +
+    geom_circle( aes(x0 = 0, y0 = 0, r = 1), inherit.aes = F) + 
+    scale_x_continuous(limits = c(-1, 1)) +
+    scale_y_continuous(limits = c(-1, 1)) +
+    coord_fixed() +
+    geom_segment(aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2), arrow = arrow())
+  
+  ind_plot <- ggplot(data=dbind,aes(x=Dim.1,y=Dim.2, color = ACANOM))+
+    ggtitle(paste0("Figure II - Espace des formations universitaires des DOM-TOM pour l'année 20", k))+
+    scale_color_brewer(palette = "Set1") +
+    geom_point()+
+    geom_text_repel(aes(label=paste(ACANOM, discipline, niveau)),size=3, show.legend = FALSE)+
+    geom_hline(yintercept=0,linetype="dashed")+
+    geom_vline(xintercept = 0,linetype="dashed")+
+    theme(plot.title=element_text(hjust=0.5),legend.position=c(.95,.2),
+          panel.background =element_rect(fill="white"),legend.title=element_blank())+
+    xlab(paste("Axe 1 :",round(base_annee_ACP$eig[1,2],0),"%"))+
+    ylab(paste("Axe 2 :",round(base_annee_ACP$eig[2,2],0),"%"))
+  guides(label = FALSE)
+  
+  # assign(paste0("bar_plot",k, sep="_"),bar_plot)
+  assign(paste0("var_plot",k, sep="_"),var_plot)
+  assign(paste0("ind_plot",k, sep="_"),ind_plot)
+  
+}
+
+```
+
+## L'année 2006
+
+```{r, fig.height= 10, fig.width= 12}
+var_plot06_
+ind_plot06_
+  
+```
+
+## L'année 2009
+
+```{r, fig.height= 10, fig.width= 12}
+var_plot09_
+ind_plot09_
+  
+```
+
+## L'année 2012
+
+```{r, fig.height= 10, fig.width= 12}
+var_plot12_
+ind_plot12_
+  
+```
+
+## L'année 2015
+
+```{r, fig.height= 10, fig.width= 12}
+var_plot15_
+ind_plot15_
+  
+```
+
+## L'année 2018
+
+```{r, fig.height= 10, fig.width= 12}
+var_plot18_
+ind_plot18_
+  
+```
+
